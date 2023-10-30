@@ -2,18 +2,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from camera import Camera
-from utils import random_camera_angles
+import utils
 
-camera = Camera(size=(1280, 720))
+camera = Camera(size=(320, 240))
+c = camera.capture(position=(1.0, -4.0, 1.0), target=(0.0, 0.0, 0.0), fov=45.0)
 
-captures = [
-    camera.capture(position=c['camera_position'], target=c['camera_target'], fov=c['camera_field_of_view'])
-    for c in random_camera_angles(20)
-]
+points = utils.depth_to_world(c['depth_image'])
+print(points)
 
-fix, ax = plt.subplots(5, 4)
-for y in range(5):
-    for x in range(4):
-        ax[y, x].imshow(captures[y * 4 + x]['depth_image'])
-
+# plt.imshow(c['depth_image'])
+ax = plt.figure().add_subplot(projection='3d')
+ax.plot(points[:, 0], points[:, 1], points[:, 2], 'b.')
 plt.show()

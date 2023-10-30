@@ -24,3 +24,18 @@ def random_camera_angles(count):
         })
 
     return res
+
+
+def depth_to_world(depth_image):
+    height, width = depth_image.shape
+    y = np.linspace(1.0, -1.0, height)
+    x = np.linspace(-1.0, 1.0, width)
+    res = []
+    for iy in range(height):
+        for ix in range(width):
+            if depth_image[iy, ix] > 0.9995:
+                continue
+            v = np.array([x[ix], y[iy], depth_image[iy, ix], 1.0])
+            point = v[:3] / v[3]
+            res.append(point)
+    return np.array(res)
