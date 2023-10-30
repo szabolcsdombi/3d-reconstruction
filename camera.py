@@ -133,7 +133,7 @@ class Camera:
 
         color = np.frombuffer(self.image.read(), 'u1').reshape(height, width, 4)[::-1, :, :3].copy()
         depth = np.frombuffer(self.depth.read(), 'f4').reshape(height, width)[::-1, :].copy()
-        camera_matrix = np.frombuffer(camera, 'f4').reshape(4, 4)
+        camera_matrix = np.frombuffer(camera, 'f4').reshape(4, 4).T.copy()
 
         return {
             'color_image': color,
