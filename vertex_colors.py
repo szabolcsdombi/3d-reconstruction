@@ -15,7 +15,7 @@ depth = ctx.image(window.size, 'depth32float')
 model = gzip.decompress(open('colormonkey.mesh.gz', 'rb').read())
 vertex_buffer = ctx.buffer(model)
 
-uniform_buffer = ctx.buffer(size=80)
+uniform_buffer = ctx.buffer(size=96)
 
 pipeline = ctx.pipeline(
     vertex_shader='''
@@ -24,20 +24,23 @@ pipeline = ctx.pipeline(
 
         layout (std140) uniform Common {
             mat4 mvp;
-            vec4 light;
+            vec4 eye_pos;
+            vec4 light_pos;
         };
 
-        layout (location = 0) in vec3 in_vert;
+        layout (location = 0) in vec3 in_vertex;
         layout (location = 1) in vec3 in_normal;
         layout (location = 2) in vec3 in_color;
 
+        out vec3 v_vertex;
         out vec3 v_normal;
         out vec3 v_color;
 
         void main() {
-            gl_Position = mvp * vec4(in_vert, 1.0);
+            v_vertex = in_vertex;
             v_normal = in_normal;
             v_color = in_color;
+            gl_Position = mvp * vec4(v_vertex, 1.0);
         }
     ''',
     fragment_shader='''
@@ -46,18 +49,52 @@ pipeline = ctx.pipeline(
 
         layout (std140) uniform Common {
             mat4 mvp;
-            vec4 light;
+            vec4 eye_pos;
+            vec4 light_pos;
         };
 
+        in vec3 v_vertex;
         in vec3 v_normal;
         in vec3 v_color;
 
+        const vec3 light_color = vec3(1.0, 1.0, 1.0);
+        const float light_power = 20.0;
+
         layout (location = 0) out vec4 out_color;
 
+        vec3 blinn_phong() {
+            float ambient = 0.2;
+            float facing = 0.1;
+            float shininess = 16.0;
+
+            vec3 light_dir = light_pos.xyz - v_vertex;
+            float light_distance = length(light_dir);
+            light_distance = light_distance * light_distance;
+            light_dir = normalize(light_dir);
+
+            float lambertian = max(dot(light_dir, v_normal), 0.0);
+            float specular = 0.0;
+
+            vec3 view_dir = normalize(eye_pos.xyz - v_vertex);
+
+            if (lambertian > 0.0) {
+                vec3 half_dir = normalize(light_dir + view_dir);
+                float spec_angle = max(dot(half_dir, v_normal), 0.0);
+                specular = pow(spec_angle, shininess);
+            }
+
+            float facing_view_dot = max(dot(view_dir, v_normal), 0.0);
+
+            vec3 color_linear = v_color * ambient + v_color * facing_view_dot * facing +
+                v_color * lambertian * light_color.rgb * light_power / light_distance +
+                specular * light_color.rgb * light_power / light_distance;
+
+            vec3 color_gamma_corrected = pow(color_linear, vec3(1.0 / 2.2));
+            return color_gamma_corrected;
+        }
+
         void main() {
-            float lum = dot(normalize(light.xyz), normalize(v_normal)) * 0.7 + 0.3;
-            out_color = vec4(v_color * lum, 1.0);
-            out_color.rgb = pow(out_color.rgb, vec3(1.0 / 2.2));
+            out_color = vec4(blinn_phong(), 1.0);
         }
     ''',
     layout=[
@@ -82,9 +119,10 @@ pipeline = ctx.pipeline(
 
 while window.update():
     ctx.new_frame()
+    light = (3.0, -4.0, 10.0)
     eye = (np.cos(window.time * 0.5) * 5.0, np.sin(window.time * 0.5) * 5.0, 1.0)
     camera = zengl.camera(eye, (0.0, 0.0, 0.0), aspect=window.aspect, fov=45.0)
-    uniform_buffer.write(camera + struct.pack('fff4x', *eye))
+    uniform_buffer.write(struct.pack('64s3f4x3f4x', camera, *eye, *light))
 
     image.clear()
     depth.clear()
