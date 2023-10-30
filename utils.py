@@ -58,9 +58,30 @@ def depth_to_world(color_image, depth_image, camera_position, camera_target, cam
     return np.array(res)
 
 
+def point_to_mesh(point):
+    e = 0.005
+    x, y, z, r, g, b = point
+    lines = []
+    lines.append(f'v {x:.4f} {y:.4f} {z - e:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x + e:.4f} {y:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x:.4f} {y + e:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x - e:.4f} {y:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x:.4f} {y - e:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x:.4f} {y:.4f} {z + e:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append('f -6 -4 -5')
+    lines.append('f -6 -3 -4')
+    lines.append('f -6 -2 -3')
+    lines.append('f -6 -5 -2')
+    lines.append('f -5 -4 -1')
+    lines.append('f -4 -3 -1')
+    lines.append('f -3 -2 -1')
+    lines.append('f -2 -5 -1')
+    return '\n'.join(lines)
+
+
 def points_to_obj(points):
     lines = []
     lines.append('o points')
-    for x, y, z, r, g, b in points:
-        lines.append(f'v {x:.4f} {y:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    for p in points:
+        lines.append(point_to_mesh(p))
     return '\n'.join(lines)
