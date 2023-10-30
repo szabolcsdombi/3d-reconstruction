@@ -121,8 +121,9 @@ class Camera:
     def capture(self, position, target, fov):
         width, height = self.image.size
         aspect = width / height
+        near, far = 1.0, 10.0
         light = (3.0, -4.0, 10.0)
-        camera = zengl.camera(position, target, aspect=aspect, fov=fov, near=1.0, far=10.0)
+        camera = zengl.camera(position, target, aspect=aspect, fov=fov, near=near, far=far)
 
         self.ctx.new_frame()
         self.uniform_buffer.write(struct.pack('64s3f4x3f4x', camera, *position, *light))
@@ -133,7 +134,6 @@ class Camera:
 
         color = np.frombuffer(self.image.read(), 'u1').reshape(height, width, 4)[::-1, :, :3].copy()
         depth = np.frombuffer(self.depth.read(), 'f4').reshape(height, width)[::-1, :].copy()
-        camera_matrix = np.frombuffer(camera, 'f4').reshape(4, 4).T.copy()
 
         return {
             'color_image': color,
@@ -141,6 +141,10 @@ class Camera:
             'image_size': [width, height],
             'camera_position': list(position),
             'camera_target': list(target),
-            'camera_matrix': camera_matrix,
-            'camera_field_of_view': fov,
+            'camera_settings': {
+                'aspect': aspect,
+                'fov': fov,
+                'near': near,
+                'far': far,
+            },
         }

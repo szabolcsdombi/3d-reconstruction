@@ -12,7 +12,13 @@ captures = [
 ]
 
 points = np.concatenate([
-    utils.depth_to_world(c['color_image'], c['depth_image'], c['camera_matrix'])
+    utils.depth_to_world(
+        c['color_image'],
+        c['depth_image'],
+        c['camera_position'],
+        c['camera_target'],
+        c['camera_settings'],
+    )
     for c in captures
 ])
 

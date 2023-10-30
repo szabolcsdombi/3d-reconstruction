@@ -1,4 +1,5 @@
 import numpy as np
+import zengl
 
 
 def random_camera_angles(count):
@@ -26,11 +27,15 @@ def random_camera_angles(count):
     return res
 
 
-def depth_to_world(color_image, depth_image, camera_matrix):
-    height, width = depth_image.shape
+def depth_to_world(color_image, depth_image, camera_position, camera_target, camera_settings):
+    camera = zengl.camera(camera_position, camera_target, **camera_settings)
+    camera_matrix = np.frombuffer(camera, 'f4').reshape(4, 4).T.copy()
     inv = np.linalg.inv(camera_matrix)
+
+    height, width = depth_image.shape
     y = np.linspace(1.0, -1.0, height)
     x = np.linspace(-1.0, 1.0, width)
+
     res = []
     for iy in range(height):
         for ix in range(width):
@@ -41,6 +46,7 @@ def depth_to_world(color_image, depth_image, camera_matrix):
             point = v[:3] / v[3]
             color = color_image[iy, ix].astype('f4') / 255.0
             res.append([*point, *color])
+
     return np.array(res)
 
 
