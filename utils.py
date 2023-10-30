@@ -24,12 +24,9 @@ def random_camera_angles(count):
         v = np.random.uniform(-1.5, 1.5)
         target = np.array([np.cos(u) * np.cos(v), np.sin(u) * np.cos(v), np.sin(v)]) * r
 
-        fov = 45.0
-
         res.append({
             'camera_position': position.tolist(),
             'camera_target': target.tolist(),
-            'camera_field_of_view': float(fov),
         })
 
     return res
@@ -58,16 +55,15 @@ def depth_to_world(color_image, depth_image, camera_position, camera_target, cam
     return np.array(res)
 
 
-def point_to_mesh(point):
-    e = 0.005
+def point_to_mesh(point, eps):
     x, y, z, r, g, b = point
     lines = []
-    lines.append(f'v {x:.4f} {y:.4f} {z - e:.4f} {r:.4f} {g:.4f} {b:.4f}')
-    lines.append(f'v {x + e:.4f} {y:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
-    lines.append(f'v {x:.4f} {y + e:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
-    lines.append(f'v {x - e:.4f} {y:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
-    lines.append(f'v {x:.4f} {y - e:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
-    lines.append(f'v {x:.4f} {y:.4f} {z + e:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x:.4f} {y:.4f} {z - eps:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x + eps:.4f} {y:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x:.4f} {y + eps:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x - eps:.4f} {y:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x:.4f} {y - eps:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    lines.append(f'v {x:.4f} {y:.4f} {z + eps:.4f} {r:.4f} {g:.4f} {b:.4f}')
     lines.append('f -6 -4 -5')
     lines.append('f -6 -3 -4')
     lines.append('f -6 -2 -3')
@@ -79,9 +75,9 @@ def point_to_mesh(point):
     return '\n'.join(lines)
 
 
-def points_to_obj(points):
+def points_to_obj(points, eps=0.005):
     lines = []
     lines.append('o points')
     for p in points:
-        lines.append(point_to_mesh(p))
+        lines.append(point_to_mesh(p, eps))
     return '\n'.join(lines)

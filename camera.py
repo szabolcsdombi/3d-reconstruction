@@ -118,7 +118,7 @@ class Camera:
             vertex_count=self.vertex_buffer.size // zengl.calcsize('3f 3f 3f'),
         )
 
-    def capture(self, position, target, fov):
+    def capture(self, position, target, fov=45.0):
         width, height = self.image.size
         aspect = width / height
         near, far = 1.0, 10.0

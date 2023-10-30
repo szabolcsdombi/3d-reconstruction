@@ -7,7 +7,7 @@ import utils
 camera = Camera(size=(320, 240))
 
 captures = [
-    camera.capture(position=c['camera_position'], target=c['camera_target'], fov=c['camera_field_of_view'])
+    camera.capture(position=c['camera_position'], target=c['camera_target'])
     for c in utils.random_camera_angles(20)
 ]
 
