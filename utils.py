@@ -2,6 +2,14 @@ import numpy as np
 import zengl
 
 
+def random_normal_vector(length):
+    while True:
+        xyz = np.random.uniform(-1.0, 1.0, 3)
+        norm = np.linalg.norm(xyz)
+        if norm < 1.0:
+            return xyz * length / norm
+
+
 def random_camera_angles(count):
     res = []
 
