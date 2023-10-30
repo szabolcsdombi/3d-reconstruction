@@ -28,7 +28,7 @@ def random_camera_angles(count):
 
 def depth_to_world(depth_image, camera_matrix):
     height, width = depth_image.shape
-    inv = np.linalg.inv(camera_matrix.T)
+    inv = np.linalg.inv(camera_matrix)
     y = np.linspace(1.0, -1.0, height)
     x = np.linspace(-1.0, 1.0, width)
     res = []
@@ -36,7 +36,7 @@ def depth_to_world(depth_image, camera_matrix):
         for ix in range(width):
             if depth_image[iy, ix] > 0.9995:
                 continue
-            v = np.array([x[ix], y[iy], depth_image[iy, ix], 1.0])
+            v = np.array([x[ix], y[iy], depth_image[iy, ix] * 2.0 - 1.0, 1.0])
             v = inv @ v
             point = v[:3] / v[3]
             res.append(point)
