@@ -131,7 +131,7 @@ class Renderer:
         self.ctx.end_frame()
 
         color = np.frombuffer(self.image.read(), 'u1').reshape(size[1], size[0], 4)[::-1, :, :3].copy()
-        depth = None
+        depth = np.frombuffer(self.depth.read(), 'f4').reshape(size[1], size[0])[::-1, :].copy()
 
         return color, depth
 
@@ -143,5 +143,6 @@ renderer = Renderer((512, 512))
 
 color, depth = renderer.render(eye=(2.0, -4.0, 1.0), target=(0.0, 0.0, 0.0), fov=45.0)
 
-plt.imshow(color)
+# plt.imshow(color)
+plt.imshow(depth)
 plt.show()
