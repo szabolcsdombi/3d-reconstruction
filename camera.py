@@ -7,7 +7,7 @@ import zengl
 zengl.init(zengl.loader(headless=True))
 
 
-class Renderer:
+class Camera:
     def __init__(self, size):
         self.ctx = zengl.context()
         self.image = self.ctx.image(size, 'rgba8unorm')
@@ -118,7 +118,7 @@ class Renderer:
             vertex_count=self.vertex_buffer.size // zengl.calcsize('3f 3f 3f'),
         )
 
-    def render(self, eye, target, fov):
+    def capture(self, eye, target, fov):
         size = self.image.size
         light = (3.0, -4.0, 10.0)
         camera = zengl.camera(eye, (0.0, 0.0, 0.0), aspect=size[0] / size[1], fov=45.0)
@@ -134,15 +134,3 @@ class Renderer:
         depth = np.frombuffer(self.depth.read(), 'f4').reshape(size[1], size[0])[::-1, :].copy()
 
         return color, depth
-
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-renderer = Renderer((512, 512))
-
-color, depth = renderer.render(eye=(2.0, -4.0, 1.0), target=(0.0, 0.0, 0.0), fov=45.0)
-
-# plt.imshow(color)
-plt.imshow(depth)
-plt.show()
