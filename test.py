@@ -5,9 +5,16 @@ from camera import Camera
 import utils
 
 camera = Camera(size=(320, 240))
-c = camera.capture(position=(1.0, -4.0, 1.0), target=(0.0, 0.0, 0.0), fov=45.0)
 
-points = utils.depth_to_world(c['color_image'], c['depth_image'], c['camera_matrix'])
+captures = [
+    camera.capture(position=c['camera_position'], target=c['camera_target'], fov=c['camera_field_of_view'])
+    for c in utils.random_camera_angles(20)
+]
+
+points = np.concatenate([
+    utils.depth_to_world(c['color_image'], c['depth_image'], c['camera_matrix'])
+    for c in captures
+])
 
 with open('points.obj', 'w') as f:
     f.write(utils.points_to_obj(points))
