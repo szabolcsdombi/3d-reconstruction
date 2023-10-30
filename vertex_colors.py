@@ -9,7 +9,7 @@ from window import Window
 window = Window()
 ctx = zengl.context()
 
-image = ctx.image(window.size, 'rgba8unorm-srgb', samples=4)
+image = ctx.image(window.size, 'rgba8unorm', samples=4)
 depth = ctx.image(window.size, 'depth24plus', samples=4)
 image.clear_value = (0.005, 0.005, 0.005, 1.0)
 
@@ -57,14 +57,8 @@ pipeline = ctx.pipeline(
 
         void main() {
             float lum = dot(normalize(light.xyz), normalize(v_normal)) * 0.7 + 0.3;
-            if (lum < 0.6) {
-                lum = 0.6;
-            } else if (lum < 0.9) {
-                lum = 0.9;
-            } else {
-                lum = 1.0;
-            }
             out_color = vec4(v_color * lum, 1.0);
+            out_color.rgb = pow(out_color.rgb, vec3(1.0 / 2.2));
         }
     ''',
     layout=[
@@ -96,5 +90,5 @@ while window.update():
     image.clear()
     depth.clear()
     pipeline.render()
-    image.blit(srgb=True)
+    image.blit()
     ctx.end_frame()
