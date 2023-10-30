@@ -118,14 +118,14 @@ class Camera:
             vertex_count=self.vertex_buffer.size // zengl.calcsize('3f 3f 3f'),
         )
 
-    def capture(self, eye, target, fov):
+    def capture(self, position, target, fov):
         width, height = self.image.size
         aspect = width / height
         light = (3.0, -4.0, 10.0)
-        camera = zengl.camera(eye, target, aspect=aspect, fov=fov)
+        camera = zengl.camera(position, target, aspect=aspect, fov=fov)
 
         self.ctx.new_frame()
-        self.uniform_buffer.write(struct.pack('64s3f4x3f4x', camera, *eye, *light))
+        self.uniform_buffer.write(struct.pack('64s3f4x3f4x', camera, *position, *light))
         self.image.clear()
         self.depth.clear()
         self.pipeline.render()
@@ -133,5 +133,14 @@ class Camera:
 
         color = np.frombuffer(self.image.read(), 'u1').reshape(height, width, 4)[::-1, :, :3].copy()
         depth = np.frombuffer(self.depth.read(), 'f4').reshape(height, width)[::-1, :].copy()
+        camera_matrix = np.frombuffer(camera, 'f4').reshape(4, 4)
 
-        return color, depth
+        return {
+            'color_image': color,
+            'depth_image': depth,
+            'image_size': [width, height],
+            'camera_position': list(position),
+            'camera_target': list(target),
+            'camera_matrix': camera_matrix,
+            'camera_field_of_view': fov,
+        }
