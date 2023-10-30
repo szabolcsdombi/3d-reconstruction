@@ -4,13 +4,12 @@ import struct
 import numpy as np
 import zengl
 
-from window import Window
-
-window = Window()
+zengl.init(zengl.loader(headless=True))
 ctx = zengl.context()
 
-image = ctx.image(window.size, 'rgba8unorm')
-depth = ctx.image(window.size, 'depth32float')
+size = (512, 512)
+image = ctx.image(size, 'rgba8unorm')
+depth = ctx.image(size, 'depth32float')
 
 model = gzip.decompress(open('colormonkey.mesh.gz', 'rb').read())
 vertex_buffer = ctx.buffer(model)
@@ -117,15 +116,21 @@ pipeline = ctx.pipeline(
     vertex_count=vertex_buffer.size // zengl.calcsize('3f 3f 3f'),
 )
 
-while window.update():
-    ctx.new_frame()
-    light = (3.0, -4.0, 10.0)
-    eye = (np.cos(window.time * 0.5) * 5.0, np.sin(window.time * 0.5) * 5.0, 1.0)
-    camera = zengl.camera(eye, (0.0, 0.0, 0.0), aspect=window.aspect, fov=45.0)
-    uniform_buffer.write(struct.pack('64s3f4x3f4x', camera, *eye, *light))
+t = 10.0
 
-    image.clear()
-    depth.clear()
-    pipeline.render()
-    image.blit()
-    ctx.end_frame()
+ctx.new_frame()
+light = (3.0, -4.0, 10.0)
+eye = (np.cos(t * 0.5) * 5.0, np.sin(t * 0.5) * 5.0, 1.0)
+camera = zengl.camera(eye, (0.0, 0.0, 0.0), aspect=size[0] / size[1], fov=45.0)
+uniform_buffer.write(struct.pack('64s3f4x3f4x', camera, *eye, *light))
+
+image.clear()
+depth.clear()
+pipeline.render()
+ctx.end_frame()
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+plt.imshow(np.frombuffer(image.read(), 'u1').reshape(size[1], size[0], 4))
+plt.show()
