@@ -9,9 +9,8 @@ from window import Window
 window = Window()
 ctx = zengl.context()
 
-image = ctx.image(window.size, 'rgba8unorm', samples=4)
-depth = ctx.image(window.size, 'depth24plus', samples=4)
-image.clear_value = (0.005, 0.005, 0.005, 1.0)
+image = ctx.image(window.size, 'rgba8unorm')
+depth = ctx.image(window.size, 'depth32float')
 
 model = gzip.decompress(open('colormonkey.mesh.gz', 'rb').read())
 vertex_buffer = ctx.buffer(model)
