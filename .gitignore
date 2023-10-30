@@ -4,6 +4,7 @@ dist
 
 __pycache__
 *.egg-info
+*.obj
 *.pyc
 *.pyd
 *.so

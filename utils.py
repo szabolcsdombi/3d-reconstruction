@@ -26,7 +26,7 @@ def random_camera_angles(count):
     return res
 
 
-def depth_to_world(depth_image, camera_matrix):
+def depth_to_world(color_image, depth_image, camera_matrix):
     height, width = depth_image.shape
     inv = np.linalg.inv(camera_matrix)
     y = np.linspace(1.0, -1.0, height)
@@ -39,5 +39,14 @@ def depth_to_world(depth_image, camera_matrix):
             v = np.array([x[ix], y[iy], depth_image[iy, ix] * 2.0 - 1.0, 1.0])
             v = inv @ v
             point = v[:3] / v[3]
-            res.append(point)
+            color = color_image[iy, ix].astype('f4') / 255.0
+            res.append([*point, *color])
     return np.array(res)
+
+
+def points_to_obj(points):
+    lines = []
+    lines.append('o points')
+    for x, y, z, r, g, b in points:
+        lines.append(f'v {x:.4f} {y:.4f} {z:.4f} {r:.4f} {g:.4f} {b:.4f}')
+    return '\n'.join(lines)
