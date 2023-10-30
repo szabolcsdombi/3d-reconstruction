@@ -7,7 +7,7 @@ import utils
 camera = Camera(size=(320, 240))
 c = camera.capture(position=(1.0, -4.0, 1.0), target=(0.0, 0.0, 0.0), fov=45.0)
 
-points = utils.depth_to_world(c['depth_image'])
+points = utils.depth_to_world(c['depth_image'], c['camera_matrix'])
 print(points)
 
 # plt.imshow(c['depth_image'])
