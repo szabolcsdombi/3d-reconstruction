@@ -14,6 +14,6 @@ captures = [
 fix, ax = plt.subplots(5, 4)
 for y in range(5):
     for x in range(4):
-        ax[y, x].imshow(captures[y * 4 + x]['color_image'])
+        ax[y, x].imshow(captures[y * 4 + x]['depth_image'])
 
 plt.show()

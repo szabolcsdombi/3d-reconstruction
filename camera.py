@@ -122,7 +122,7 @@ class Camera:
         width, height = self.image.size
         aspect = width / height
         light = (3.0, -4.0, 10.0)
-        camera = zengl.camera(position, target, aspect=aspect, fov=fov)
+        camera = zengl.camera(position, target, aspect=aspect, fov=fov, near=1.0, far=10.0)
 
         self.ctx.new_frame()
         self.uniform_buffer.write(struct.pack('64s3f4x3f4x', camera, *position, *light))
